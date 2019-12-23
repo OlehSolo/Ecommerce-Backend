@@ -15,6 +15,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
@@ -23,6 +24,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.NaturalId;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mongale.ecommercecore.model.audit.DateAudit;
 
 
@@ -63,6 +65,8 @@ public class User extends DateAudit {
 	    @Size(max = 50)
 	    @Email
 	    private String email;
+	    
+	    
 
 	    @NotBlank
 	    private String password;
@@ -78,6 +82,18 @@ public class User extends DateAudit {
 	            joinColumns = @JoinColumn(name = "user_id"),
 	            inverseJoinColumns = @JoinColumn(name = "address_id"))
 	    private Set<Address> addresses = new HashSet<>();
+	    
+	    @OneToOne(mappedBy="user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+		private Cart cart;
+	    
+
+		public Cart getCart() {
+			return cart;
+		}
+
+		public void setCart(Cart cart) {
+			this.cart = cart;
+		}
 
 		public Set<Address> getAddresses() {
 			return addresses;
@@ -128,9 +144,7 @@ public class User extends DateAudit {
 	        this.username = username;
 	    }
 
-	    public String getName() {
-	        return firstName;
-	    }
+	    
         
 	    public String getLastName()
 	    {
@@ -146,9 +160,7 @@ public class User extends DateAudit {
 	    public void setPhoneNumber(String phoneNumber) {
 	    	this.phoneNumber = phoneNumber;
 	    }
-	    public void setName(String name) {
-	        this.firstName = name;
-	    }
+	   
 
 	    public String getEmail() {
 	        return email;

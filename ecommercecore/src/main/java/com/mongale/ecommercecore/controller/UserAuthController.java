@@ -73,7 +73,7 @@ public class UserAuthController {
 		        userRepository
 		            .findById(userId)
 		            .orElseThrow(() -> new ResourceNotFoundException("User not found on :: " + userId));
-		    user.setName(userDetails.getName());
+		    user.setFirstName(userDetails.getFirstName());
 		    user.setLastName(userDetails.getLastName());
 		    user.setEmail(userDetails.getEmail());
 		    user.setUsername(userDetails.getUsername());
@@ -119,8 +119,8 @@ public class UserAuthController {
 	      
             
 	        // Creating user's account
-	        User user = new User(signUpRequest.getName(),  signUpRequest.getLastName(), 
-	        	signUpRequest.getPhoneNumber(), signUpRequest.getUsername(),
+	        User user = new User(signUpRequest.getFirstName(),  signUpRequest.getLastName(), 
+	        	signUpRequest.getPhoneNumber(), signUpRequest.getEmail(),
 	            signUpRequest.getEmail(), signUpRequest.getPassword(), 
 	            signUpRequest.getAddresses());
 	        
@@ -132,9 +132,37 @@ public class UserAuthController {
 	        // Creating a HashMap to store user's addresses
 	        Set<Address> addressMap = new HashSet();
 	        addressMap.add(userAddress);
+	        
+	        Set<String> strRoles = signUpRequest.getRole();
+	        Set<Role> roles = new HashSet<>();
+	        
 
 	        // Adding address to user's address collection
 	        user.setAddresses(addressMap);
+	        
+	        strRoles.forEach(role -> {
+				switch (role) {
+				case "admin":
+					Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
+							.orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+					roles.add(adminRole);
+
+					break;
+				case "customer":
+					Role pmRole = roleRepository.findByName(RoleName.ROLE_CUSTOMER)
+							.orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+					roles.add(pmRole);
+
+					break;
+				default:
+					Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
+							.orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+					roles.add(userRole);
+				}
+			});
+
+	       
+	          user.setRoles(roles);
 
 	        // Encoding the user's password
 	        user.setPassword(passwordEncoder.encode(user.getPassword()));
